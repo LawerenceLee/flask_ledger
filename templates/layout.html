@@ -1,0 +1,15 @@
+<doctype HTML>
+<html>
+    <head>
+        <title>Ledger Flask | {% block title %}{% endblock %}</title>
+    </head>
+    <body>
+        <nav>
+            <h2><a href="{{ url_for('index') }}">HOME</a></h2>    
+            <h2><a href="{{ url_for('index') }}">Create Account</a></h2>
+            <h2><a href="{{ url_for('index') }}">Create Entry</a></h2>
+            <h2><a href="{{ url_for('index') }}">Create Transfer</a></h2> 
+        </nav>
+        {% block content %}{% endblock %}
+    </body>
+</html>
