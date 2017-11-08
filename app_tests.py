@@ -2,7 +2,7 @@ import os
 import unittest
 
 from playhouse.test_utils import test_database
-from peewee import SqliteDatabase
+from peewee import IntegrityError, SqliteDatabase
 
 import flask_ledger
 from models import (Account, Entry, Transfer)
@@ -20,7 +20,7 @@ class AccountModelTestCase(unittest.TestCase):
         for i in range(count):
             Account.create_account(
                 name='Checking Account #{}'.format(i),
-                balance=1000 + i,
+                balance=1000,
                 accnt_type='Checking',
                 bank='Chase',
             )
@@ -62,18 +62,18 @@ class EntryModelTestCase(unittest.TestCase):
         """Create two entries, one credit, one debit for
         testing purposes.
         """
-        Entry.create(
+        Entry.create_entry(
             descrip='Car Repair',
             date='09/05/1961',
             tranact_type='debit',
-            amount='500',
+            amount=500,
             assc_accnt=account,
         )
-        Entry.create(
+        Entry.create_entry(
                 descrip='Paycheck',
                 date='09/05/1961',
                 tranact_type='credit',
-                amount='500',
+                amount=500,
                 assc_accnt=account,
             )
 
@@ -105,25 +105,22 @@ class EntryModelTestCase(unittest.TestCase):
             AccountModelTestCase.create_accounts(1)
             account = Account.select().get()
 
-            # Create an Entry instance w/ bad tranact_type.
-            Entry.create(
-                descrip='Paycheck',
-                date='09/05/1961',
-                tranact_type='gibberish',
-                amount='500',
-                assc_accnt=account,
-            )
-            entry = Entry.select().get()
-
             # Assert if a ValueError was raised.
-            with self.assertRaises(ValueError):
-                entry.mk_accnt_chgs()
+            # Create an Entry instance w/ bad tranact_type.
+            with self.assertRaises(IntegrityError):
+                Entry.create_entry(
+                    descrip='Paycheck',
+                    date='09/05/1961',
+                    tranact_type='gibberish',
+                    amount=500,
+                    assc_accnt=account,
+                )
 
 
 class DebitCreditTestCase(unittest.TestCase):
 
     def test_debit_credit_functions(self):
-        """Tests that the 'mk_accnt_chgs' function accurately
+        """Tests that the create_entry method accurately
         debits or credits money to an account specified within
         an Entry class instance.
         """
@@ -191,7 +188,7 @@ class TransferModelTestCase(unittest.TestCase):
             # Checks if balances reflect changes
             # specified in Transfer instance.
             self.assertEqual(transfer.from_accnt.balance, 950)
-            self.assertEqual(transfer.to_accnt.balance, 1051)
+            self.assertEqual(transfer.to_accnt.balance, 1050)
 
 
 class ViewTestCase(unittest.TestCase):
