@@ -78,3 +78,9 @@ class Transfer(Model):
     def mk_transfer(self):
         self.from_accnt.debit(amount=self.amount)
         self.to_accnt.credit(amount=self.amount)
+
+
+def initialize():
+    DATABASE.connect()
+    DATABASE.create_tables([Account, Entry, Transfer], safe=True)
+    DATABASE.close()
