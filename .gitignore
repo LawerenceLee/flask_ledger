@@ -2,3 +2,6 @@ ledger_env
 models.pyc
 __pycache__/models.cpython-36.pyc
 __pycache__/flask_ledger.cpython-36.pyc
+flask_ledger.pyc
+forms.pyc
+__pycache__/forms.cpython-36.pyc
