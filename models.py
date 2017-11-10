@@ -53,7 +53,9 @@ class Entry(Model):
         constraints=[Check(
             "tranact_type == 'debit' or tranact_type == 'credit'"
         )])
-    amount = FloatField()
+    amount = FloatField(
+        constraints=[Check("amount >= 0")]
+        )
     # Associated Account
     assc_accnt = ForeignKeyField(
         rel_model=Account,
@@ -63,12 +65,6 @@ class Entry(Model):
     class Meta():
         database = DATABASE
         order_by = ('-date',)
-
-    def mk_accnt_chgs(self):
-        if self.tranact_type == 'debit':
-            self.assc_accnt.debit(self.amount)
-        elif self.tranact_type == 'credit':
-            self.assc_accnt.credit(self.amount)
 
     @classmethod
     def create_entry(cls, descrip, date, tranact_type, amount, assc_accnt):
@@ -88,13 +84,21 @@ class Entry(Model):
                 assc_accnt=assc_accnt,
             )
 
+    def mk_accnt_chgs(self):
+        if self.tranact_type == 'debit':
+            self.assc_accnt.debit(self.amount)
+        elif self.tranact_type == 'credit':
+            self.assc_accnt.credit(self.amount)
+
 
 class Transfer(Model):
     """Facilitates the transfer of funds from one account to another."""
     # Description
     descrip = CharField()
     date = DateField()
-    amount = FloatField()  # NEED TO CREATE A CONSTAINT FOR NEGATIVE NUMBERS.
+    amount = FloatField(
+        constraints=[Check("amount >= 0")]
+        )
     # From Account
     from_accnt = ForeignKeyField(
         rel_model=Account,
@@ -110,6 +114,17 @@ class Transfer(Model):
         database = DATABASE
         order_by = ('-date',)
 
+    @classmethod
+    def create_transfer(cls, descrip, date, amount, from_accnt, to_accnt):
+        with DATABASE.transaction():
+            cls.create(
+                descrip=descrip,
+                date=date,
+                amount=amount,
+                from_accnt=from_accnt,
+                to_accnt=to_accnt,
+            )
+
     def mk_transfer(self):
         """Deducts the transfer's amount from the 'from_accnt', and
         adds it to the 'to_accnt'.
@@ -117,7 +132,7 @@ class Transfer(Model):
         self.from_accnt.debit(amount=self.amount)
         self.to_accnt.credit(amount=self.amount)
 
-        # CHECK OUT AMOUNT FIELD, & USE DATABASE.TRANSACTION
+        # USE DATABASE.TRANSACTION
         # FOR THIS CLASS
 
 
