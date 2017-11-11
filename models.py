@@ -68,7 +68,7 @@ class Entry(Model):
 
     @classmethod
     def create_entry(cls, descrip, date, tranact_type, amount, assc_accnt):
-        """Creates entries using a peewee's built-in
+        """Creates entries using peewee's built-in
         transaction method. Essentially, if an exception occurs
         within the DATABASE.transaction() block, the transaction will
         be rolled back. Otherwise the statements will be committed at
@@ -131,9 +131,6 @@ class Transfer(Model):
         """
         self.from_accnt.debit(amount=self.amount)
         self.to_accnt.credit(amount=self.amount)
-
-        # USE DATABASE.TRANSACTION
-        # FOR THIS CLASS
 
 
 def initialize():
