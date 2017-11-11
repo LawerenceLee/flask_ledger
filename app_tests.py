@@ -209,10 +209,9 @@ class TransferModelTestCase(unittest.TestCase):
             self.assertEqual(transfer.to_accnt.balance, 1050)
 
     def test_bad_amount(self):
-        """Creates two test accounts, deducts an amount
-        from one account and adds it to the other,
-        checks if the accounts balances reflect the
-        changes specified in the Transfer.
+        """Tests if a peewee.IntegrityError is raised when
+        instantiating an instance of the Transfer class with
+        an 'amount' that is negative.
         """
         with test_database(TEST_DB, (Account, Transfer)):
             AccountModelTestCase.create_accounts()
@@ -226,8 +225,7 @@ class TransferModelTestCase(unittest.TestCase):
                     amount=-50,
                     from_accnt=account_1,
                     to_accnt=account_2,
-
-                )    
+                )
 
 
 class ViewTestCase(unittest.TestCase):
@@ -247,6 +245,15 @@ class ViewTestCase(unittest.TestCase):
         flask_ledger.app.config['TESTING'] = True
         flask_ledger.app.config['WTF_CSRF_ENABLED'] = False
         self.app = flask_ledger.app.test_client()
+
+
+class AccountViewTestCase(ViewTestCase):
+    '''Inherits from ViewTestCase'''
+
+    def test_empty_database(self):
+        with test_database(TEST_DB, (Account, )):
+            rv = self.app.get('/')
+            self.assertIn("no accounts yet", rv.get_data(as_text=True).lower())
 
 
 if __name__ == "__main__":
