@@ -1,12 +1,23 @@
-<doctype HTML>
+<!doctype HTML>
 <html>
     <head>
         <title>Ledger Flask | {% block title %}{% endblock %}</title>
     </head>
     <body>
+        {% with messages=get_flashed_messages() %}
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="message">
+                {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% endwith %}
         <nav>
             <h2><a href="{{ url_for('index') }}">HOME</a></h2>    
-            <h2><a href="{{ url_for('index') }}">Create Account</a></h2>
+            <h2><a href="{{ url_for('create_account') }}">Create Account</a></h2>
             <h2><a href="{{ url_for('index') }}">Create Entry</a></h2>
             <h2><a href="{{ url_for('index') }}">Create Transfer</a></h2> 
         </nav>
