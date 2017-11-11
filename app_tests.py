@@ -21,7 +21,7 @@ class AccountModelTestCase(unittest.TestCase):
             Account.create_account(
                 name='Checking Account #{}'.format(i),
                 balance=1000,
-                accnt_type='Checking',
+                accnt_type='checking',
                 bank='Chase',
             )
 
@@ -188,7 +188,6 @@ class TransferModelTestCase(unittest.TestCase):
         changes specified in the Transfer.
         """
         with test_database(TEST_DB, (Account, Transfer)):
-            # Two accounts created
             AccountModelTestCase.create_accounts()
             account_1 = Account.select().where(Account.id == 1).get()
             account_2 = Account.select().where(Account.id == 2).get()
@@ -198,7 +197,7 @@ class TransferModelTestCase(unittest.TestCase):
             # record), retrieve it from database,
             # assign to variable.
             self.create_transfers(account_1, account_2)
-            transfer = Transfer.select().get()  # Get 1st record.
+            transfer = Transfer.select().get()
 
             # Shifts funds between accounts.
             transfer.mk_transfer()
@@ -247,13 +246,42 @@ class ViewTestCase(unittest.TestCase):
         self.app = flask_ledger.app.test_client()
 
 
-class AccountViewTestCase(ViewTestCase):
+class IndexViewTestCase(ViewTestCase):
     '''Inherits from ViewTestCase'''
 
     def test_empty_database(self):
         with test_database(TEST_DB, (Account, )):
             rv = self.app.get('/')
             self.assertIn("no accounts yet", rv.get_data(as_text=True).lower())
+
+    def test_accounts_list(self):
+        with test_database(TEST_DB, (Account, )):
+            AccountModelTestCase.create_accounts(1)
+
+            rv = self.app.get('/')
+            self.assertIn(
+                'checking account #0', rv.get_data(as_text=True).lower()
+                )
+            self.assertNotIn(
+                "no accounts yet", rv.get_data(as_text=True).lower()
+                )
+
+
+class CreateAccountTestCase(ViewTestCase):
+    '''Inherits from ViewTestCase'''
+
+    def test_create_account(self):
+        account_data = {
+            'name': 'Checking Account',
+            'balance': 1000,
+            'accnt_type': 'checking',
+            'bank': 'Chase',
+        }
+        with test_database(TEST_DB, (Account, )):
+            rv = self.app.post('/create_account', data=account_data)
+            self.assertEqual(rv.status_code, 302)
+            self.assertEqual(rv.location, 'http://localhost/')
+            self.assertEqual(Account.select().count(), 1)
 
 
 if __name__ == "__main__":
