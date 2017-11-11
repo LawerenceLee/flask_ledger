@@ -1,36 +1,42 @@
 from flask_wtf import FlaskForm
 from wtforms import DecimalField, StringField, SelectField, TextAreaField
-from wtforms.validators import (DataRequired, Regexp, ValidationError)
+from wtforms.validators import (DataRequired, ValidationError)
+
 
 from models import Account, Entry, Transfer
 
 
-def name_exists(form, field):
-        if Account.select().where(Account.name == field.data).exists():
-            raise ValidationError('Account with that name already exists.')
+def account_exists(form, field):
+    if Account.select().where(Account.name == field.data).exists():
+        raise ValidationError('Account with that name already exists.')
 
 
 class CreateAccountForm(FlaskForm):
     name = StringField(
-        'Account Name: ',
+        'Account Name:',
         validators=[
             DataRequired(),
-            name_exists,
+            account_exists,
         ]
     )
-    balance = DecimalField(places=2, rounding=None)
+    balance = DecimalField(
+        'Balance:',
+        validators=[
+            DataRequired(),
+        ],
+        places=2,
+        rounding=False,
+    )
     accnt_type = SelectField(
-        u'Account Type',
+        u'Account Type:',
         choices=[
-            ('debit', 'DEBIT'),
-            ('checking', 'CHECKING')
+            ('checking', 'CHECKING'),
+            ('savings', 'SAVINGS')
         ]
     )
     bank = StringField(
-        'Bank',
+        'Associated Bank:',
         validators=[
-            DataRequired,
+            DataRequired(),
         ]
     )
-
-#  CREATE INDEX PAGE NEXT, THEN ACCOUNT CREATION PAGE
