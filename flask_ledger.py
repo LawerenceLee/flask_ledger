@@ -51,8 +51,7 @@ def create_account():
 @app.route('/')
 def index():
     accounts = Account.select()
-    entries = Entry.select()
-    return render_template('index.html', accounts=accounts, entries=entries)
+    return render_template('index.html', accounts=accounts)
 
 
 if __name__ == "__main__":
