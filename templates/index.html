@@ -8,18 +8,8 @@
         <p>No Accounts Yet</p>
     {% else %}
         {% for account in accounts %}
-            {{ account.name }} {{ account.balance }}
-            {% if not account.entries %}
-                <p>No Entries Yet</p>
-            {% else %}
-                {% for entry in entries %}
-                    {{ entry.descrip }}
-                    {{ entry.date }}                    
-                    {{ entry.tranact_type }}
-                    {{ entry.amount }}
-                    {{ entry.assoc_accnt }}         
-                {% endfor %}
-            {% endif %}
+            {{ account.name }} {{ account.balance }}<br>
+            
         {% endfor %}       
     {% endif %}
 {% endblock %}
