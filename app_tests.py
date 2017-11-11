@@ -255,7 +255,7 @@ class IndexViewTestCase(ViewTestCase):
             self.assertIn("no accounts yet", rv.get_data(as_text=True).lower())
 
     def test_accounts_list(self):
-        with test_database(TEST_DB, (Account, )):
+        with test_database(TEST_DB, (Account, Entry)):
             AccountModelTestCase.create_accounts(1)
 
             rv = self.app.get('/')
