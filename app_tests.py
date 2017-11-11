@@ -260,14 +260,20 @@ class IndexViewTestCase(ViewTestCase):
 
             rv = self.app.get('/')
             self.assertIn(
-                'checking account #0', rv.get_data(as_text=True).lower()
+                'checking account #0', rv.get_data(
+                    as_text=True).lower()
+                )
+            self.assertIn(
+                'no entries for this account yet', rv.get_data(
+                    as_text=True).lower()
                 )
             self.assertNotIn(
-                "no accounts yet", rv.get_data(as_text=True).lower()
+                "no accounts yet", rv.get_data(
+                    as_text=True).lower()
                 )
 
 
-class CreateAccountTestCase(ViewTestCase):
+class CreateAccountViewTestCase(ViewTestCase):
     '''Inherits from ViewTestCase'''
 
     def test_create_account(self):
