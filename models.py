@@ -35,6 +35,14 @@ class Account(Model):
         except IntegrityError:
             raise ValueError('Account Already Exists')
 
+    def __repr__(self):
+        return "Account.create_account(name='{}', balance={}, accnt_type='{}', bank='{}')".format(
+                    self.name, self.balance, self.accnt_type, self.bank
+                )
+
+    def __str__(self):
+        return "Name: {}, Balance: ${}".format(self.name, self.balance)
+
     def debit(self, amount):
         """Subtracts a specified amount from an account"""
         self.balance = self.balance - amount
@@ -84,6 +92,16 @@ class Entry(Model):
                 assc_accnt=assc_accnt,
             )
 
+    def __repr__(self):
+        return """Entry.create_entry(descrip='{}', date={}, tranact_type='{}', amount={}, assc_accnt={})
+               """.format(
+                       self.descrip, self.date, self.tranact_type,
+                       self.amount, self.assc_accnt
+                   )
+
+    def __str__(self):
+        return "Description: {}, Amount: ${}".format(self.descrip, self.amount)
+
     def mk_accnt_chgs(self):
         if self.tranact_type == 'debit':
             self.assc_accnt.debit(self.amount)
@@ -124,6 +142,20 @@ class Transfer(Model):
                 from_accnt=from_accnt,
                 to_accnt=to_accnt,
             )
+
+    def __repr__(self):
+        return """Transfer.create_transfer(descrip='{}', date={}, amount={}, from_accnt={}, to_accnt={})
+               """.format(
+                        self.descrip, self.date, self.amount, self.from_accnt,
+                        self.to_accnt
+                    )
+
+    def __str__(self):
+        return "From Account: {}, To Account: {}, Amount: ${}".format(
+                                                        self.from_accnt.name,
+                                                        self.to_accnt.name,
+                                                        self.amount,
+                                                        )
 
     def mk_transfer(self):
         """Deducts the transfer's amount from the 'from_accnt', and
