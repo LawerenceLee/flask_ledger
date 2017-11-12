@@ -37,14 +37,20 @@ def after_request(response):
 def create_account():
     form = CreateAccountForm()
     if form.validate_on_submit():
-        Account.create_account(
-            name=form.name.data.strip(),
-            balance=form.balance.data,
-            accnt_type=form.accnt_type.data,
-            bank=form.bank.data.strip(),
-        )
-        flash('Account Successfully Created', category='success')
-        return redirect(url_for('index'))
+        try:
+            Account.create_account(
+                name=form.name.data.strip(),
+                balance=form.balance.data,
+                accnt_type=form.accnt_type.data,
+                bank=form.bank.data.strip(),
+            )
+        except Exception as e:
+            flash('An error occured in creating your account',
+                  category='failure')
+            flash(e, category='failure')
+        else:
+            flash('Account Successfully Created', category='success')
+            return redirect(url_for('index'))
     return render_template('create_account.html', form=form)
 
 
@@ -74,7 +80,8 @@ def create_entry():
                   category='failure')
             flash(e, category='failure')
         else:
-            entry = Entry.select().get()
+            lst_entry = Entry.select().count()
+            entry = Entry.select().where(Entry.id == lst_entry).get()
             entry.mk_accnt_chgs()
             flash('Entry Created', category='success')
             return redirect(url_for('index'))
@@ -83,6 +90,7 @@ def create_entry():
 
 @app.route('/')
 def index():
+    
     accounts = Account.select()
     return render_template('index.html', accounts=accounts)
 
