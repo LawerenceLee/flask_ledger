@@ -54,6 +54,24 @@ class AccountModelTestCase(unittest.TestCase):
                     bank='Chase',
                 )
 
+    def test_repr_method(self):
+        with test_database(TEST_DB, (Account, )):
+            self.create_accounts(1)
+            account_1 = Account.select().get()
+
+            instance = "Account.create_account(name='Checking Account #0', balance=1000.0, accnt_type='checking', bank='Chase')"
+
+            self.assertEqual(instance, repr(account_1))
+
+    def test_str_method(self):
+        with test_database(TEST_DB, (Account, )):
+            self.create_accounts(1)
+            account_1 = Account.select().get()
+
+            str_var = "Name: Checking Account #0, Balance: $1000.0"
+
+            self.assertEqual(str_var, str(account_1))
+
 
 class EntryModelTestCase(unittest.TestCase):
 
@@ -133,6 +151,17 @@ class EntryModelTestCase(unittest.TestCase):
                     amount=-500,
                     assc_accnt=account,
                 )
+
+    def test_str_method(self):
+        with test_database(TEST_DB, (Account, Entry)):
+            AccountModelTestCase.create_accounts(1)
+            account_1 = Account.select().get()
+            self.create_entries(account_1)
+            entry = Entry.select().get()
+
+            str_var = "Description: Car Repair, Amount: $500.0"
+
+            self.assertEqual(str_var, str(entry))
 
 
 class DebitCreditTestCase(unittest.TestCase):
@@ -226,6 +255,19 @@ class TransferModelTestCase(unittest.TestCase):
                     to_accnt=account_2,
                 )
 
+    def test_str_method(self):
+        with test_database(TEST_DB, (Account, Transfer)):
+            AccountModelTestCase.create_accounts()
+            to_account = Account.select().where(Account.id == 1).get()
+            from_account = Account.select().where(Account.id == 2).get()
+
+            self.create_transfers(from_account, to_account, 1)
+            transfer = Transfer.select().get()
+
+            str_var = "From Account: Checking Account #1, To Account: Checking Account #0, Amount: $50.0"
+
+            self.assertEqual(str(transfer), str_var)
+
 
 class ViewTestCase(unittest.TestCase):
 
@@ -252,12 +294,13 @@ class IndexViewTestCase(ViewTestCase):
     def test_empty_database(self):
         with test_database(TEST_DB, (Account, )):
             rv = self.app.get('/')
-            self.assertIn("no accounts yet", rv.get_data(as_text=True).lower())
+            self.assertIn(
+                "no accounts yet", rv.get_data(as_text=True).lower()
+                )
 
     def test_accounts_list(self):
         with test_database(TEST_DB, (Account, Entry)):
             AccountModelTestCase.create_accounts(1)
-
             rv = self.app.get('/')
             self.assertIn(
                 'checking account #0', rv.get_data(
@@ -266,6 +309,31 @@ class IndexViewTestCase(ViewTestCase):
             self.assertIn(
                 'no entries for this account yet', rv.get_data(
                     as_text=True).lower()
+                )
+            self.assertNotIn(
+                "no accounts yet", rv.get_data(
+                    as_text=True).lower()
+                )
+
+    def test_entries_for_accounts_list(self):
+        with test_database(TEST_DB, (Account, Entry)):
+            AccountModelTestCase.create_accounts(1)
+            account = Account.select().get()
+            EntryModelTestCase.create_entries(account)
+            entry_1 = Entry.select().where(Entry.id == 1).get()
+            entry_2 = Entry.select().where(Entry.id == 2).get()
+            rv = self.app.get('/')
+            self.assertIn(
+                account.name, rv.get_data(
+                    as_text=True)
+                )
+            self.assertIn(
+                entry_1.descrip, rv.get_data(
+                    as_text=True)
+                )
+            self.assertIn(
+                entry_2.descrip, rv.get_data(
+                    as_text=True)
                 )
             self.assertNotIn(
                 "no accounts yet", rv.get_data(
