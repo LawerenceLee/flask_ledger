@@ -8,8 +8,17 @@
         <p>No Accounts Yet</p>
     {% else %}
         {% for account in accounts %}
-            {{ account.name }} {{ account.balance }}<br>
-            
+            <h3>{{ account.name }}: ${{ account.balance }}</h3>
+            {% if account.entries %}
+                {% for entry in account.entries %}
+                    {{ entry.descrip }}
+                    {{ entry.date }}                 
+                    {{ entry.tranact_type }}
+                    ${{ entry.amount }}
+                {% endfor %}
+            {% else %}
+                <p>No Entries for this account yet.</p>
+            {% endif %}
         {% endfor %}       
     {% endif %}
 {% endblock %}
