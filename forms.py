@@ -1,5 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import DecimalField, StringField, SelectField, TextAreaField
+from wtforms import (DateField, DecimalField,
+                     StringField, SelectField,
+                     )
 from wtforms.validators import (DataRequired, ValidationError)
 
 
@@ -39,4 +41,39 @@ class CreateAccountForm(FlaskForm):
         validators=[
             DataRequired(),
         ]
+    )
+
+
+class CreateEntryForm(FlaskForm):
+    descrip = StringField(
+        "Description:",
+        validators=[
+            DataRequired(),
+        ]
+    )
+    date = DateField(
+        "Date (YYYY-MM-DD):",
+        validators=[
+            DataRequired(),
+        ]
+    )
+    tranact_type = SelectField(
+        "Transaction Type:",
+        choices=[
+            ('debit', 'DEBIT'),
+            ('credit', 'CREDIT'),
+        ]
+    )
+    amount = DecimalField(
+        'Amount:',
+        validators=[
+            DataRequired(),
+        ],
+        places=2,
+        rounding=False,
+    )
+    # assc_accnt choices are append to the form
+    # at the time of the request.
+    assc_accnt = SelectField(
+        'Associated Account:'
     )
