@@ -12,9 +12,9 @@
             {% if account.entries %}
                 {% for entry in account.entries %}
                     {{ entry.descrip }}
-                    {{ entry.date }}                 
+                    {{ entry.date }}             
                     {{ entry.tranact_type }}
-                    ${{ entry.amount }}
+                    ${{ entry.amount }}<br>
                 {% endfor %}
             {% else %}
                 <p>No Entries for this account yet.</p>
