@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% from 'macros.html' import render_field %}
+
+{% block title %}Create Entry{% endblock %}
+
+{% block content %}
+<h1>Account Entry</h1>
+<form method='POST' action=''>
+    {{ form.hidden_tag() }}
+    {{ render_field(form.descrip) }}
+    {{ render_field(form.date) }}
+    {{ render_field(form.tranact_type) }}
+    {{ render_field(form.amount) }}
+    {{ render_field(form.assc_accnt) }}
+    <input type="submit" value="Create Entry">
+</form>
+{% endblock %}
