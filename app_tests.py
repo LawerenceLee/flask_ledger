@@ -76,21 +76,15 @@ class AccountModelTestCase(unittest.TestCase):
 class EntryModelTestCase(unittest.TestCase):
 
     @staticmethod
-    def create_entries(account):
+    def create_entries(account, tranact_type, count=2):
         """Create two entries, one credit, one debit for
         testing purposes.
         """
-        Entry.create_entry(
-            descrip='Car Repair',
-            date='09/05/1961',
-            tranact_type='debit',
-            amount=500,
-            assc_accnt=account,
-        )
-        Entry.create_entry(
-                descrip='Paycheck',
+        for i in range(count):
+            Entry.create_entry(
+                descrip='Car Repair',
                 date='09/05/1961',
-                tranact_type='credit',
+                tranact_type=tranact_type,
                 amount=500,
                 assc_accnt=account,
             )
@@ -103,7 +97,7 @@ class EntryModelTestCase(unittest.TestCase):
             account = Account.select().get()
 
             # Create two entries & save one to a variable.
-            self.create_entries(account=account)
+            self.create_entries(account, 'debit')
             entry = Entry.select().get()
 
             # Check if entries are in database.
@@ -156,7 +150,7 @@ class EntryModelTestCase(unittest.TestCase):
         with test_database(TEST_DB, (Account, Entry)):
             AccountModelTestCase.create_accounts(1)
             account_1 = Account.select().get()
-            self.create_entries(account_1)
+            self.create_entries(account_1, 'credit', 1)
             entry = Entry.select().get()
 
             str_var = "Description: Car Repair, Amount: $500.0"
@@ -173,14 +167,14 @@ class DebitCreditTestCase(unittest.TestCase):
         """
         with test_database(TEST_DB, (Account, Entry)):
             # Create two accounts & assign both two variables.
-            AccountModelTestCase.create_accounts()
+            AccountModelTestCase.create_accounts(2)
             account_1 = Account.select().where(Account.id == 1).get()
             account_2 = Account.select().where(Account.id == 2).get()
 
             # Create an entry for each account, one debit, one
             # credit, & assign both to variables.
-            EntryModelTestCase.create_entries(account=account_1)
-            EntryModelTestCase.create_entries(account=account_2)
+            EntryModelTestCase.create_entries(account_1, 'debit', 1)
+            EntryModelTestCase.create_entries(account_2, 'credit', 1)
             entry_1 = Entry.select().where(Entry.id == 1).get()
             entry_2 = Entry.select().where(Entry.id == 2).get()
 
@@ -188,10 +182,13 @@ class DebitCreditTestCase(unittest.TestCase):
             entry_1.mk_accnt_chgs()
             entry_2.mk_accnt_chgs()
 
+            account_1_update = Account.select().where(Account.id == 1).get()
+            account_2_update = Account.select().where(Account.id == 2).get()
+
             # Assert that each account's new balance reflects the
             # changes in their corresponding entry.
-            self.assertEqual(entry_1.assc_accnt.balance, 500.00)
-            self.assertEqual(entry_2.assc_accnt.balance, 1500.00)
+            self.assertEqual(account_1_update.balance, 500.00)
+            self.assertEqual(account_2_update.balance, 1500.00)
 
 
 class TransferModelTestCase(unittest.TestCase):
@@ -218,23 +215,26 @@ class TransferModelTestCase(unittest.TestCase):
         """
         with test_database(TEST_DB, (Account, Transfer)):
             AccountModelTestCase.create_accounts()
-            account_1 = Account.select().where(Account.id == 1).get()
-            account_2 = Account.select().where(Account.id == 2).get()
+            from_account = Account.select().where(Account.id == 1).get()
+            to_account = Account.select().where(Account.id == 2).get()
 
             # Create a Transfer instance (does not
             # actually perform transfer, merely a
             # record), retrieve it from database,
             # assign to variable.
-            self.create_transfers(account_1, account_2)
+            self.create_transfers(from_account, to_account)
             transfer = Transfer.select().get()
 
             # Shifts funds between accounts.
             transfer.mk_transfer()
 
+            from_account_update = Account.select().where(Account.id == 1).get()
+            to_account_update = Account.select().where(Account.id == 2).get()
+
             # Checks if balances reflect changes
             # specified in Transfer instance.
-            self.assertEqual(transfer.from_accnt.balance, 950)
-            self.assertEqual(transfer.to_accnt.balance, 1050)
+            self.assertEqual(from_account_update.balance, 950)
+            self.assertEqual(to_account_update.balance, 1050)
 
     def test_bad_amount(self):
         """Tests if a peewee.IntegrityError is raised when
@@ -317,14 +317,20 @@ class IndexViewTestCase(ViewTestCase):
 
     def test_entries_for_accounts_list(self):
         with test_database(TEST_DB, (Account, Entry)):
-            AccountModelTestCase.create_accounts(1)
-            account = Account.select().get()
-            EntryModelTestCase.create_entries(account)
+            AccountModelTestCase.create_accounts(2)
+            account_1 = Account.select().where(Account.id == 1).get()
+            account_2 = Account.select().where(Account.id == 1).get()
+            EntryModelTestCase.create_entries(account_1, 'credit', 1)
+            EntryModelTestCase.create_entries(account_2, 'debit', 1)
             entry_1 = Entry.select().where(Entry.id == 1).get()
             entry_2 = Entry.select().where(Entry.id == 2).get()
             rv = self.app.get('/')
             self.assertIn(
-                account.name, rv.get_data(
+                account_1.name, rv.get_data(
+                    as_text=True)
+                )
+            self.assertIn(
+                account_2.name, rv.get_data(
                     as_text=True)
                 )
             self.assertIn(
@@ -356,6 +362,9 @@ class CreateAccountViewTestCase(ViewTestCase):
             self.assertEqual(rv.status_code, 302)
             self.assertEqual(rv.location, 'http://localhost/')
             self.assertEqual(Account.select().count(), 1)
+
+# Entry creation
+# NO accounts, can't create entry, redirect, flash message
 
 
 if __name__ == "__main__":
