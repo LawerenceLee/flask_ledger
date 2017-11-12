@@ -43,13 +43,19 @@ class Account(Model):
     def __str__(self):
         return "Name: {}, Balance: ${}".format(self.name, self.balance)
 
-    def debit(self, amount):
+    @staticmethod
+    def debit(accnt_name, accnt_balance, amount):
         """Subtracts a specified amount from an account"""
-        self.balance = self.balance - amount
+        Account.update(
+            balance=accnt_balance-amount).where(
+                Account.name == accnt_name).execute()
 
-    def credit(self, amount):
+    @staticmethod
+    def credit(accnt_name, accnt_balance, amount):
         """Adds a specified amount to an account"""
-        self.balance = self.balance + amount
+        Account.update(
+            balance=accnt_balance+amount).where(
+                Account.name == accnt_name).execute()
 
 
 class Entry(Model):
@@ -104,9 +110,17 @@ class Entry(Model):
 
     def mk_accnt_chgs(self):
         if self.tranact_type == 'debit':
-            self.assc_accnt.debit(self.amount)
+            self.assc_accnt.debit(
+                self.assc_accnt.name,
+                self.assc_accnt.balance,
+                self.amount
+            )
         elif self.tranact_type == 'credit':
-            self.assc_accnt.credit(self.amount)
+            self.assc_accnt.credit(
+                self.assc_accnt.name,
+                self.assc_accnt.balance,
+                self.amount
+            )
 
 
 class Transfer(Model):
@@ -152,17 +166,20 @@ class Transfer(Model):
 
     def __str__(self):
         return "From Account: {}, To Account: {}, Amount: ${}".format(
-                                                        self.from_accnt.name,
-                                                        self.to_accnt.name,
-                                                        self.amount,
-                                                        )
+                    self.from_accnt.name, self.to_accnt.name, self.amount)
 
     def mk_transfer(self):
         """Deducts the transfer's amount from the 'from_accnt', and
         adds it to the 'to_accnt'.
         """
-        self.from_accnt.debit(amount=self.amount)
-        self.to_accnt.credit(amount=self.amount)
+        self.from_accnt.debit(
+            self.from_accnt.name,
+            self.from_accnt.balance,
+            self.amount)
+        self.to_accnt.credit(
+            self.to_accnt.name,
+            self.to_accnt.balance,
+            self.amount)
 
 
 def initialize():
