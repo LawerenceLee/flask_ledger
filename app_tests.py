@@ -363,8 +363,26 @@ class CreateAccountViewTestCase(ViewTestCase):
             self.assertEqual(rv.location, 'http://localhost/')
             self.assertEqual(Account.select().count(), 1)
 
-# Entry creation
-# NO accounts, can't create entry, redirect, flash message
+
+class CreateEntryViewTestCase(ViewTestCase):
+    '''Inherits from ViewTestCase'''
+
+    def test_create_entry(self):
+        entry_data = {
+            'descrip': 'Passing Go',
+            'date': '2017-11-12',
+            'tranact_type': 'credit',
+            'amount': 50,
+            'assc_accnt': 1,
+        }
+        with test_database(TEST_DB, (Account, Entry)):
+            AccountModelTestCase.create_accounts(1)
+            rv = self.app.post('/create_entry', data=entry_data)
+            self.assertEqual(rv.status_code, 302)
+            self.assertEqual(rv.location, 'http://localhost/')
+            self.assertEqual(Entry.select().count(), 1)
+
+# NO accounts, can't create entry, redirect, flash message test.
 
 
 if __name__ == "__main__":
