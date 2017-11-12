@@ -2,7 +2,7 @@ from flask import (Flask, g, render_template,
                    flash, redirect, url_for,
                    abort)
 
-from forms import CreateAccountForm
+from forms import CreateAccountForm, CreateEntryForm
 from models import (Account, DATABASE, Entry, initialize,
                     Transfer, )
 
@@ -46,6 +46,39 @@ def create_account():
         flash('Account Successfully Created', category='success')
         return redirect(url_for('index'))
     return render_template('create_account.html', form=form)
+
+
+@app.route('/create_entry', methods=('GET', 'POST'))
+def create_entry():
+    form = CreateEntryForm()
+    form.assc_accnt.choices = [(str(account.id), account.name)
+                               for account in Account.select()]
+
+    if form.assc_accnt.choices == []:
+        flash('Need to create an Account first', category='failure')
+        return redirect(url_for('index'))
+
+    if form.validate_on_submit():
+        assc_accnt = Account.select().where(
+            Account.id == form.assc_accnt.data).get()
+        try:
+            Entry.create_entry(
+                descrip=form.descrip.data,
+                date=form.date.data,
+                tranact_type=form.tranact_type.data,
+                amount=form.amount.data,
+                assc_accnt=assc_accnt,
+            )
+        except Exception as e:
+            flash('An error occured in creating your entry',
+                  category='failure')
+            flash(e, category='failure')
+        else:
+            entry = Entry.select().get()
+            entry.mk_accnt_chgs()
+            flash('Entry Created', category='success')
+            return redirect(url_for('index'))
+    return render_template('create_entry.html', form=form)
 
 
 @app.route('/')
