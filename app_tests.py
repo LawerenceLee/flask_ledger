@@ -363,6 +363,37 @@ class CreateAccountViewTestCase(ViewTestCase):
             self.assertEqual(rv.location, 'http://localhost/')
             self.assertEqual(Account.select().count(), 1)
 
+    def test_duplicate_accnt(self):
+        account_data = {
+            'name': 'Checking Account #0',
+            'balance': 1000,
+            'accnt_type': 'checking',
+            'bank': 'Chase',
+        }
+        with test_database(TEST_DB, (Account, )):
+            AccountModelTestCase.create_accounts(1)
+            rv = self.app.post('/create_account', data=account_data)
+            self.assertEqual(rv.status_code, 200)
+            self.assertIn(
+                'Account with that name already exists',
+                rv.get_data(as_text=True))
+            self.assertEqual(Account.select().count(), 1)
+
+    def test_bad_balance_for_accnt(self):
+        account_data = {
+            'name': 'Checking Account',
+            'balance': -1000,
+            'accnt_type': 'checking',
+            'bank': 'Chase',
+        }
+        with test_database(TEST_DB, (Account, )):
+            rv = self.app.post('/create_account', data=account_data)
+            self.assertEqual(rv.status_code, 200)
+            self.assertIn(
+                'This value must be positive.', rv.get_data(as_text=True)
+            )
+            self.assertEqual(Account.select().count(), 0)
+
 
 class CreateEntryViewTestCase(ViewTestCase):
     '''Inherits from ViewTestCase'''
