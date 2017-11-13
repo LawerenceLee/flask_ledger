@@ -32,7 +32,6 @@ class CreateAccountForm(FlaskForm):
         'Balance:',
         validators=[
             DataRequired(),
-            must_be_positive,
         ],
         places=2,
         rounding=False,
