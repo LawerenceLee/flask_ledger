@@ -289,35 +289,49 @@ class ViewTestCase(unittest.TestCase):
 
 
 class IndexViewTestCase(ViewTestCase):
-    '''Inherits from ViewTestCase'''
+    '''Tests various aspects of the index View function in
+    flask_ledger.
+    '''
 
     def test_empty_database(self):
+        """Checks if 'index' view function renders a html
+        template with <p>No Accounts Yet</p> due to an empty
+        database.
+        """
         with test_database(TEST_DB, (Account, )):
             rv = self.app.get('/')
             self.assertIn(
-                "no accounts yet", rv.get_data(as_text=True).lower()
+                "no accounts yet",
+                rv.get_data(as_text=True).lower()
                 )
 
     def test_accnts_list(self):
+        """Checks if 'index' view function renders a html
+        template with <p>No Entries for this account yet</p>
+        due to an Account being without any entries.
+        """
         with test_database(TEST_DB, (Account, Entry)):
-            AccountModelTestCase.create_accounts(1)
+            AccountModelTestCase.create_accounts(count=1)
             rv = self.app.get('/')
             self.assertIn(
-                'checking account #0', rv.get_data(
-                    as_text=True).lower()
+                'checking account #0',
+                rv.get_data(as_text=True).lower()
                 )
             self.assertIn(
-                'no entries for this account yet', rv.get_data(
-                    as_text=True).lower()
+                'no entries for this account yet',
+                rv.get_data(as_text=True).lower()
                 )
             self.assertNotIn(
-                "no accounts yet", rv.get_data(
-                    as_text=True).lower()
+                "no accounts yet",
+                rv.get_data(as_text=True).lower()
                 )
 
     def test_list_of_entries_for_accnts(self):
+        """Tests if index view function properly sends Accounts
+        with their entries to its template
+        """
         with test_database(TEST_DB, (Account, Entry)):
-            AccountModelTestCase.create_accounts(2)
+            AccountModelTestCase.create_accounts(count=2)
             account_1 = Account.select().where(Account.id == 1).get()
             account_2 = Account.select().where(Account.id == 1).get()
             EntryModelTestCase.create_entries(account_1, 'credit', 1)
@@ -326,31 +340,35 @@ class IndexViewTestCase(ViewTestCase):
             entry_2 = Entry.select().where(Entry.id == 2).get()
             rv = self.app.get('/')
             self.assertIn(
-                account_1.name, rv.get_data(
-                    as_text=True)
+                account_1.name,
+                rv.get_data(as_text=True)
                 )
             self.assertIn(
-                account_2.name, rv.get_data(
-                    as_text=True)
+                account_2.name,
+                rv.get_data(as_text=True)
                 )
             self.assertIn(
-                entry_1.descrip, rv.get_data(
-                    as_text=True)
+                entry_1.descrip,
+                rv.get_data(as_text=True)
                 )
             self.assertIn(
-                entry_2.descrip, rv.get_data(
-                    as_text=True)
+                entry_2.descrip,
+                rv.get_data(as_text=True)
                 )
             self.assertNotIn(
-                "no accounts yet", rv.get_data(
-                    as_text=True).lower()
+                "no accounts yet",
+                rv.get_data(as_text=True).lower()
                 )
 
 
 class CreateAccountViewTestCase(ViewTestCase):
-    '''Inherits from ViewTestCase'''
+    '''Tests various aspects of the create_account View function in flask_ledger.
+    '''
 
     def test_create_accnt(self):
+        """Checks if upon creating an account you are
+        redirected to the index view, and that an account
+        was actually added to the database."""
         account_data = {
             'name': 'Checking Account',
             'balance': 1000,
@@ -364,6 +382,8 @@ class CreateAccountViewTestCase(ViewTestCase):
             self.assertEqual(Account.select().count(), 1)
 
     def test_duplicate_accnt(self):
+        """Tests the form validator for duplicate account
+        names."""
         account_data = {
             'name': 'Checking Account #0',
             'balance': 1000,
@@ -379,26 +399,16 @@ class CreateAccountViewTestCase(ViewTestCase):
                 rv.get_data(as_text=True))
             self.assertEqual(Account.select().count(), 1)
 
-    def test_bad_balance_for_accnt(self):
-        account_data = {
-            'name': 'Checking Account',
-            'balance': -1000,
-            'accnt_type': 'checking',
-            'bank': 'Chase',
-        }
-        with test_database(TEST_DB, (Account, )):
-            rv = self.app.post('/create_account', data=account_data)
-            self.assertEqual(rv.status_code, 200)
-            self.assertIn(
-                'This value must be positive.', rv.get_data(as_text=True)
-            )
-            self.assertEqual(Account.select().count(), 0)
-
 
 class CreateEntryViewTestCase(ViewTestCase):
-    '''Inherits from ViewTestCase'''
+    '''Tests various aspects of the create_entry View function
+    in flask_ledger.
+    '''
 
     def test_create_entry(self):
+        """Checks if upon creating an entry you are
+        redirected to the index view, and that an entry
+        was actually added to the database."""
         entry_data = {
             'descrip': 'Passing Go',
             'date': '2017-11-12',
@@ -414,6 +424,8 @@ class CreateEntryViewTestCase(ViewTestCase):
             self.assertEqual(Entry.select().count(), 1)
 
     def test_create_entry_without_accnt(self):
+        """Tests if redirect occurs due to an entry trying
+        to be created with no accounts in the database."""
         with test_database(TEST_DB, (Account, Entry)):
             rv = self.app.get('/create_entry')
             self.assertEqual(Entry.select().count(), 0)
@@ -421,6 +433,8 @@ class CreateEntryViewTestCase(ViewTestCase):
             self.assertEqual(rv.location, 'http://localhost/')
 
     def test_bad_amount_for_entry(self):
+        """Tests form validator for negative numbers in the
+        amount field"""
         entry_data = {
             'descrip': 'Passing Go',
             'date': '2017-11-12',
@@ -436,6 +450,12 @@ class CreateEntryViewTestCase(ViewTestCase):
                 'This value must be positive.', rv.get_data(as_text=True)
             )
             self.assertEqual(Entry.select().count(), 0)
+
+# Tests to make:
+# Creating a transfer
+# transfer with to and from account the same
+# negative value in amount
+# transfer appearing in Index html
 
 
 if __name__ == "__main__":
