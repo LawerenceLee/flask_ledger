@@ -8,7 +8,8 @@
         <p>No Accounts Yet</p>
     {% else %}
         {% for account in accounts %}
-            <h3>{{ account.name }}: ${{ account.balance }}</h3>
+            <br><h3>{{ account.name }}: ${{ account.balance }}</h3>
+            <h4>Entries</h4>
             {% if account.entries %}
                 {% for entry in account.entries %}
                     {{ entry.descrip }}
@@ -18,6 +19,28 @@
                 {% endfor %}
             {% else %}
                 <p>No Entries for this account yet.</p>
+            {% endif %}
+            <h4>Sent Transfers</h4>
+            {% if account.from_accnts %}
+                {% for transfer in account.from_accnts %}
+                    {{ transfer.descrip }}
+                    {{ transfer.date }}
+                    {{ transfer.to_accnt.name }}
+                    ${{ transfer.amount }}<br>
+                {% endfor %}
+            {% else %}
+                <p>No Transfers from this account yet.</p>
+            {% endif %}
+            <h4>Received Transfers</h4>
+            {% if account.to_accnts %}
+                {% for transfer in account.to_accnts %}
+                    {{ transfer.descrip }}
+                    {{ transfer.date }}
+                    {{ transfer.from_accnt.name }}
+                    ${{ transfer.amount }}<br>
+                {% endfor %}
+            {% else %}
+                <p>No Transfers received for this account yet.</p>
             {% endif %}
         {% endfor %}       
     {% endif %}
