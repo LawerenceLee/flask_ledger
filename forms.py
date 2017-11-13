@@ -4,6 +4,8 @@ from wtforms import (DateField, DecimalField,
                      )
 from wtforms.validators import (DataRequired, ValidationError)
 
+from not_equal_validator import NotEqualTo
+from models import Account
 
 from models import Account, Entry, Transfer
 
