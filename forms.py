@@ -15,6 +15,13 @@ def account_exists(form, field):
         raise ValidationError('Account with that name already exists.')
 
 
+def must_be_positive(form, field):
+    if field.data is None:
+        pass
+    elif field.data < 0:
+        raise ValidationError('This value must be positive.')
+
+
 class CreateAccountForm(FlaskForm):
     name = StringField(
         'Account Name:',
