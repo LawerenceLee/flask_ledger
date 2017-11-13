@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% from 'macros.html' import render_field %}
+
+{% block title %}Create Transfer{% endblock %}
+
+{% block content %}
+<h1>Create Transfer</h1>
+<form method='POST' action=''>
+    {{ form.hidden_tag() }}
+    {{ render_field(form.descrip) }}
+    {{ render_field(form.date) }}
+    {{ render_field(form.amount) }}
+    {{ render_field(form.from_accnt) }}
+    {{ render_field(form.to_accnt) }}
+    <input type="submit" value="Make Transfer">
+</form>
+{% endblock %}
