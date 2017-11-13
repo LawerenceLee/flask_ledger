@@ -6,3 +6,4 @@ flask_ledger.pyc
 forms.pyc
 __pycache__/forms.cpython-36.pyc
 .vscode/settings.json
+__pycache__/not_equal_validator.cpython-36.pyc
