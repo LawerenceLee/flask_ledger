@@ -2,7 +2,7 @@ from flask import (Flask, g, render_template,
                    flash, redirect, url_for,
                    abort)
 
-from forms import CreateAccountForm, CreateEntryForm
+from forms import CreateAccountForm, CreateEntryForm, CreateTransferForm
 from models import (Account, DATABASE, Entry, initialize,
                     Transfer, )
 
@@ -88,9 +88,53 @@ def create_entry():
     return render_template('create_entry.html', form=form)
 
 
+@app.route('/create_transfer', methods=('GET', 'POST'))
+def create_transfer():
+    form = CreateTransferForm()
+    choices = [(str(account.id), account.name)
+               for account in Account.select()]
+    form.from_accnt.choices = choices
+    form.to_accnt.choices = choices
+
+    if len(form.from_accnt.choices) < 2:
+        flash('Need to create two Accounts first', category='failure')
+        return redirect(url_for('index'))
+
+    if form.validate_on_submit():
+        from_accnt = Account.select().where(
+            Account.id == form.from_accnt.data).get()
+        to_accnt = Account.select().where(
+            Account.id == form.to_accnt.data).get()
+
+        if form.from_accnt.data == form.from_accnt.data:
+            flash(
+                'May not use the same account for To and From Account Fields',
+                category='failure'
+            )
+            render_template('create_transfer.html', form=form)
+
+        try:
+            Transfer.create_transfer(
+                descrip=form.descrip.data,
+                date=form.date.data,
+                amount=form.amount.data,
+                from_accnt=from_accnt,
+                to_accnt=to_accnt,
+            )
+        except Exception as e:
+            flash(e, category='failure')
+        else:
+            lst_transfer = Transfer.select().count()
+            transfer = Transfer.select().where(
+                Transfer.id == lst_transfer).get()
+            transfer.mk_transfer()
+            flash('Transfer Successful', category='success')
+            return redirect(url_for('index'))
+    return render_template('create_transfer.html', form=form)
+
+
 @app.route('/')
 def index():
-    
     accounts = Account.select()
     return render_template('index.html', accounts=accounts)
 
