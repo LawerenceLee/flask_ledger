@@ -86,3 +86,38 @@ class CreateEntryForm(FlaskForm):
     assc_accnt = SelectField(
         'Associated Account:'
     )
+
+class CreateTransferForm(FlaskForm):
+    descrip = StringField(
+        "Description:",
+        validators=[
+            DataRequired(),
+        ]
+    )
+    date = DateField(
+        "Date (YYYY-MM-DD):",
+        validators=[
+            DataRequired(),
+        ]
+    )
+    amount = DecimalField(
+        'Amount:',
+        validators=[
+            must_be_positive,
+        ],
+        places=2,
+        rounding=False,
+    )
+    from_accnt = SelectField(
+        'From Account:',
+        validators=[
+            DataRequired(),
+            NotEqualTo('to_accnt', message='Accounts must be different')
+        ]
+    )
+    to_accnt = SelectField(
+        'To Account:',
+        validators=[
+            DataRequired(),
+        ]
+    )
