@@ -7,12 +7,10 @@ from wtforms.validators import (DataRequired, ValidationError)
 from not_equal_validator import NotEqualTo
 from models import Account
 
-from models import Account, Entry, Transfer
-
 
 def account_exists(form, field):
     if Account.select().where(Account.name == field.data).exists():
-        raise ValidationError('Account with that name already exists.')
+        raise ValidationError('Account with that name already exists')
 
 
 def must_be_positive(form, field):
@@ -34,6 +32,7 @@ class CreateAccountForm(FlaskForm):
         'Balance:',
         validators=[
             DataRequired(),
+            must_be_positive,
         ],
         places=2,
         rounding=False,
@@ -76,16 +75,17 @@ class CreateEntryForm(FlaskForm):
     amount = DecimalField(
         'Amount:',
         validators=[
-            DataRequired(),
+            must_be_positive,
         ],
         places=2,
         rounding=False,
     )
-    # assc_accnt choices are append to the form
+    # assc_accnt choices are appended to the form
     # at the time of the request.
     assc_accnt = SelectField(
         'Associated Account:'
     )
+
 
 class CreateTransferForm(FlaskForm):
     descrip = StringField(

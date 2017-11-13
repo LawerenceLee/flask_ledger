@@ -298,7 +298,7 @@ class IndexViewTestCase(ViewTestCase):
                 "no accounts yet", rv.get_data(as_text=True).lower()
                 )
 
-    def test_accounts_list(self):
+    def test_accnts_list(self):
         with test_database(TEST_DB, (Account, Entry)):
             AccountModelTestCase.create_accounts(1)
             rv = self.app.get('/')
@@ -315,7 +315,7 @@ class IndexViewTestCase(ViewTestCase):
                     as_text=True).lower()
                 )
 
-    def test_entries_for_accounts_list(self):
+    def test_list_of_entries_for_accnts(self):
         with test_database(TEST_DB, (Account, Entry)):
             AccountModelTestCase.create_accounts(2)
             account_1 = Account.select().where(Account.id == 1).get()
@@ -350,7 +350,7 @@ class IndexViewTestCase(ViewTestCase):
 class CreateAccountViewTestCase(ViewTestCase):
     '''Inherits from ViewTestCase'''
 
-    def test_create_account(self):
+    def test_create_accnt(self):
         account_data = {
             'name': 'Checking Account',
             'balance': 1000,
@@ -436,8 +436,6 @@ class CreateEntryViewTestCase(ViewTestCase):
                 'This value must be positive.', rv.get_data(as_text=True)
             )
             self.assertEqual(Entry.select().count(), 0)
-
-
 
 
 if __name__ == "__main__":

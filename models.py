@@ -17,8 +17,8 @@ class Account(Model):
 
     @classmethod
     def create_account(cls, name, balance, accnt_type, bank):
-        """Creates accounts using a peewee's built-in
-        transaction method. Essentially, if an exception occurs
+        """Creates accounts using peewee's built-in
+        transaction method. If an exception occurs
         within the DATABASE.transaction() block, the transaction will
         be rolled back. Otherwise the statements will be committed at
         the end of the block.
