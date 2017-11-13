@@ -1,3 +1,5 @@
+"""Mimics the EqualTo validator of wtforms, but raises a validation
+   error if two fields are identical."""
 
 
 class ValidationError(ValueError):
